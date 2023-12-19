@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "rxwgan"
+name = "wgan"
 version = "0.1.0"
 description = ""
 authors = ["jodafons <jodafons@lps.ufrj.br>"]
@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-maestro = {git = "https://github.com/jodafons/orchestra-server.git"}
+maestro = {git = "https://github.com/jodafons/maestro.git"}
 wandb = "^0.16.0"
 loguru = "^0.7.2"
 mlflow = "^2.8.1"
