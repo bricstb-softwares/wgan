@@ -1,0 +1,11 @@
+{
+    "dataset_info" : {
+        "dataset" : "SantaCasa",
+        "tag"     : "imagiamento_anonimizado_valid",
+        "csv"     : "SantaCasa_imageamento_anonimizado_valid_table_from_raw.csv",
+        "splits"  : "splits.pkl"
+    },
+    "label"   : "notb" ,
+    "batch_size"  : 16,
+    "sample_size" : 3200
+}

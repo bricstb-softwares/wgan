@@ -50,7 +50,6 @@
                     "notb": "user.joao.pinto.task.SantaCasa.imageamento_anonimizado_valid.wgan_v2_notb.r4.samples.csv"
                 }, 
 	            "cycle": {
-                    "tb": "user.otto.tavares.task.SantaCasa_imageamento_anonimizado_valid.cycle_v1_tb.r1.Shenzhen_to_SantaCasa.samples.csv", 
 	        	    "tb": "user.otto.tavares.Manaus.manaus.cycle_v1_tb.r2.Manaus_to_SantaCasa.samples.csv"
 	            },
                 "raw": {

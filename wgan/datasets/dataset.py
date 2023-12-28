@@ -1,17 +1,64 @@
 
-__all__ = ['DownloadDataset']
+__all__ = ['DownloadDataset', 'get_data', 'get_splits', "prepare_real"]
 
-from rxwgan import stratified_train_val_test_splits
-from colorama import init, Back, Fore
+from wgan import stratified_train_val_test_splits
 from PIL import Image as Img
 from PIL import ImageOps
 from tqdm import tqdm
 import pandas as pd
-init(autoreset=True)
 import pickle
 import requests
 import json
 import os
+
+
+DATA_DIR = os.environ["DATA_DIR"]
+
+def get_splits( data_info ):
+    dataset = data_info['dataset']
+    tag     = data_info['tag']
+    split_name = data_info['splits']
+    with open( f"{DATA_DIR}/{dataset}/{tag}/raw/{split_name}", 'rb') as f:
+        return pickle.load(f) 
+
+def get_data( data_info ):
+    dataset = data_info['dataset']
+    tag     = data_info['tag']
+    table_name = data_info['csv']
+    return pd.read_csv( f"{DATA_DIR}/{dataset}/{tag}/raw/{table_name}" )
+
+
+
+def prepare_real( data_info ) -> pd.DataFrame:
+
+    data   = get_data( data_info )
+    splits = get_splits(data_info)
+    data["name"] = data_info['dataset']
+    data["type"] = "real"
+    data_list = []
+
+    for test in range(10):
+        for sort in range(9):
+            trn_idx = splits[test][sort][0]
+            val_idx = splits[test][sort][1]
+            tst_idx = splits[test][sort][2]
+            train = data.loc[trn_idx]
+            train["set"] = "train"
+            train["test"] = test
+            train["sort"] = sort
+            data_list.append(train)
+            valid = data.loc[val_idx]
+            valid["set"] = "val"
+            valid["test"] = test
+            valid["sort"] = sort
+            data_list.append(valid)
+            test = data.loc[tst_idx]
+            test["set"] = "test"
+            test["test"] = test
+            test["sort"] = sort
+            data_list.append(test)
+
+    return pd.concat(data_list)
 
 
 
