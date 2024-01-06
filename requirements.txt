@@ -1,0 +1,13 @@
+jupyterlab
+scikit-learn==1.0.2
+pandas==1.4.1
+matplotlib==3.5.1
+tensorflow-gpu==2.15.0
+expand-folders
+maestro @ git+https://github.com/jodafons/maestro.git@main
+dorothy @ git+https://github.com/bricstb-softwares/dorothy.git@master
+pybeamer
+atlas_mpl_style
+tqdm
+pandarallel
+loguru

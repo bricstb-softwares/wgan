@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 
 import tensorflow as tf 
 import pandas as pd
@@ -5,76 +7,9 @@ import numpy as np
 import argparse, traceback, json, os, pickle
 
 from wgan.models import *
-from wgan import wgangp_optimizer, prepare_raw_data
+from wgan import wgangp_optimizer, prepare_real_data
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from loguru import logger
-
-from expand_folders import expand_folders
-
-
-def generate_samples( model, output_path, image_format, nblocks=50, batch_size = 64, seed=512):
-    tf.random.set_seed(512)
-    image_id = 0
-    for idx in tqdm( range(nblocks) ):
-        z = tf.random.normal( (batch_size,100) )
-        img = model( z ).numpy()
-        for im in img:
-          image_path = image_format.format(image_id='%06d'%image_id)
-          cv2.imwrite(output_path'/'+image_path, im*255)
-
-
-#
-# daataset table creation
-#
-def generate_table():
-
-    parser = argparse.ArgumentParser(description = '', add_help = False)
-    parser = argparse.ArgumentParser()
-
-  
-    parser.add_argument('-d','--dataset_path', action='store', 
-        dest='dataset_path', required = True,
-        help = "the dataset path")
-
-    if len(sys.argv)==1:
-      parser.print_help()
-      sys.exit(1)
-
-    args = parser.parse_args()
-
-    d =  {
-          'dataset_name': [],
-          'dataset_type': [],
-          'project_id': [],
-          'image_path':[],
-          'metadata': [],
-          'test':[],
-          'sort':[],
-          'type':[],
-          }
-
-
-    basepath = args.dataset_path
-    dataset_name = args.dataset_path.split('/')[-1]
-    target = not ('notb' in dataset_name)
-
-    for test in range(10):
-        for sort in range(9):
-          folder = f'job.test_{test}.sort_{sort}'
-          logger.info(f'Generate images to test {test} sort {sort}')
-          for f in expand_folders(f"{basepath}/{folder}", filters=['*.png'])
-              project_id = f.split('/')[-1].replace('.png','')
-              d['sort'].append(sort)
-              d['test'].append(test)
-              d['type'].append('test')
-              d['metadata'].append({'has_tb':target})
-              d['dataset_name'].append(dataset_name)
-              d['dataset_type'].append('synthetic')
-              d['project_id'].append(project_id)
-              d['image_path'].append(f)
-
-    table = pd.DataFrame(d)
-    table.to_csv(dataset_name+'.csv')
 
 
 
@@ -275,3 +210,9 @@ def run_train():
     except  Exception as e:
         traceback.print_exc()
         sys.exit(1)
+
+
+
+
+if __name__ == "__main__":
+    run()
