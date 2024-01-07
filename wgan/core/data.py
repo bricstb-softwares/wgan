@@ -88,9 +88,11 @@ def stratified_train_val_test_splits(df, n_folds,seed=512):
 
 
 
-def generate_samples( model, output_path, nblocks=50, batch_size = 64, seed=512):
+def generate_samples( model, output_path, sample_size=3200, batch_size = 16, seed=512):
     tf.random.set_seed(seed)
     image_id = 0
+    nblocks = int(sample_size / batch_size)
+
     for idx in tqdm( range(nblocks) , desc="generating..."):
         z = tf.random.normal( (batch_size,100) )
         img = model( z ).numpy()

@@ -2,6 +2,11 @@
 
 
 import tensorflow as tf 
+physical_devices = tf.config.list_physical_devices('GPU')
+if len(physical_devices)>0:
+    tf.config.experimental.set_memory_growth(physical_devices[0], True)
+
+
 import pandas as pd
 import numpy as np
 import argparse, traceback, json, os, pickle, sys
@@ -11,6 +16,7 @@ from wgan.core   import prepare_data
 from wgan import wgangp_optimizer, prepare_data, generate_samples
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from loguru import logger
+
 
 
 
@@ -59,6 +65,8 @@ def run():
 
     # getting parameters from the server
     device       = int(os.environ.get('CUDA_VISIBLE_DEVICES','-1'))
+
+   
     workarea     = os.environ.get('JOB_WORKAREA'    , os.getcwd())
     job_id       = os.environ.get('JOB_ID'          , -1)
     run_id       = os.environ.get('MLFLOW_RUN_ID'   ,'' )
@@ -66,9 +74,10 @@ def run():
     dry_run      = os.environ.get('JOB_DRY_RUN'     ,'false') == 'true'
     dry_run      = dry_run or args.dry_run
 
-    if device>=0:
-        logger.info(f"running in gpu device: {device}")
-        tf.config.experimental.set_memory_growth(device, True)
+    #if device>=0:
+    #    logger.info(f"running in gpu device: {device}")
+    #    tf.config.experimental.set_memory_growth(device, True)
+    
 
 
 
@@ -165,7 +174,7 @@ def run():
 
 
         try:
-            if args.disable_wandb or is_test:
+            if args.disable_wandb or dry_run:
                 wandb=None
             else:
                 import wandb
@@ -198,11 +207,9 @@ def run():
         # generate samples
         #
         if sample_size > 0:
-          logger.info('prepare sample generation...')
+          logger.info(f'prepare sample generation with {sample_size} images...')
           os.makedirs(workarea+'/samples', exist_ok=True)
-          nblocks = int(sample_size/batch_size) if not dry_run else 1
-          image_output = f'test_{test}.sort_{sort}'
-          generate_samples( generator ,workarea+'/samples', nblocks = nblocks )
+          generate_samples( generator ,workarea+'/samples', sample_size=sample_size , batch_size=batch_size)
 
 
         #
