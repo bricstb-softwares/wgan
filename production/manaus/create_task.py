@@ -45,10 +45,10 @@ def create_task( task_name, production, info_file, dry_run=False):
 
 
 create_jobs()
-create_task( 'user.joao.pinto.task.Manaus.manaus.wgan_v2_tb'       , 'manaus_tb_card.json'      , dry_run=True )
-create_task( 'user.joao.pinto.task.Manaus.manaus.wgan_v2_notb'     , 'manaus_notb_card.json'    , dry_run=True )
-create_task( 'user.joao.pinto.task.Manaus.c_manaus.wgan_v2_tb'     , 'c_manaus_tb_card.json'    , dry_run=True )
-create_task( 'user.joao.pinto.task.Manaus.c_manaus.wgan_v2_notb'   , 'c_manaus_notb_card.json'  , dry_run=True )
+#create_task( 'user.joao.pinto.task.Manaus.manaus.wgan_v2_tb'       , 'manaus_tb_card.json'      , dry_run=True )
+#create_task( 'user.joao.pinto.task.Manaus.manaus.wgan_v2_notb'     , 'manaus_notb_card.json'    , dry_run=True )
+#create_task( 'user.joao.pinto.task.Manaus.c_manaus.wgan_v2_tb'     , 'c_manaus_tb_card.json'    , dry_run=True )
+#create_task( 'user.joao.pinto.task.Manaus.c_manaus.wgan_v2_notb'   , 'c_manaus_notb_card.json'  , dry_run=True )
 
   
 

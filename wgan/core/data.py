@@ -1,17 +1,20 @@
 
-__all__ = ["prepare_real", "stratified_train_val_test_splits"]
+__all__ = ["prepare_data", "stratified_train_val_test_splits", "generate_samples"]
 
 from tqdm import tqdm
 from sklearn.model_selection import StratifiedKFold
 from itertools import compress
+from wgan import DATA_DIR
 
 import pandas as pd
 import numpy as np
 import pickle
 import os
+import tensorflow as tf
+import cv2
 
 
-def prepare_real( data_info ) -> pd.DataFrame:
+def prepare_data( data_info ) -> pd.DataFrame:
 
     dataset    = data_info['dataset']
     tag        = data_info['tag']
@@ -27,7 +30,7 @@ def prepare_real( data_info ) -> pd.DataFrame:
 
     # append path
     def _append_basepath(row):
-        return f"{DATA_DIR}/{dataset}/{tag}/raw/{row.path}"
+        return f"{DATA_DIR}/{dataset}/{tag}/raw/{row.image_path}"
 
 
     data['image_path'] = data.apply(_append_basepath, axis='columns')
@@ -40,21 +43,21 @@ def prepare_real( data_info ) -> pd.DataFrame:
             trn_idx = splits[test][sort][0]
             val_idx = splits[test][sort][1]
             tst_idx = splits[test][sort][2]
-            train = data.loc[trn_idx]
-            train["set"] = "train"
-            train["test"] = test
-            train["sort"] = sort
-            data_list.append(train)
-            valid = data.loc[val_idx]
-            valid["set"] = "val"
-            valid["test"] = test
-            valid["sort"] = sort
-            data_list.append(valid)
-            test = data.loc[tst_idx]
-            test["set"] = "test"
-            test["test"] = test
-            test["sort"] = sort
-            data_list.append(test)
+            train_df = data.loc[trn_idx]
+            train_df["set"] = "train"
+            train_df["test"] = test
+            train_df["sort"] = sort
+            data_list.append(train_df)
+            valid_df = data.loc[val_idx]
+            valid_df["set"] = "val"
+            valid_df["test"] = test
+            valid_df["sort"] = sort
+            data_list.append(valid_df)
+            test_df = data.loc[tst_idx]
+            test_df["set"] = "test"
+            test_df["test"] = test
+            test_df["sort"] = sort
+            data_list.append(test_df)
 
     return pd.concat(data_list)
 
@@ -85,12 +88,13 @@ def stratified_train_val_test_splits(df, n_folds,seed=512):
 
 
 
-def generate_samples( model_generator, output_path, image_format, nblocks=50, batch_size = 64, seed=512):
+def generate_samples( model, output_path, nblocks=50, batch_size = 64, seed=512):
     tf.random.set_seed(seed)
     image_id = 0
     for idx in tqdm( range(nblocks) , desc="generating..."):
         z = tf.random.normal( (batch_size,100) )
         img = model( z ).numpy()
         for im in img:
-          image_path = image_format.format(image_id='%06d'%image_id)
-          cv2.imwrite(output_path'/'+image_path, im*255)
+          image_path = 'ID_%06d.png'%image_id
+          cv2.imwrite(output_path+'/'+image_path, im*255)
+          image_id+=1

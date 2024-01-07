@@ -6,7 +6,7 @@ SHELL := /bin/bash
 
 build_local:
 	virtualenv -p python ${VIRTUALENV_NAMESPACE}
-	source ${VIRTUALENV_NAMESPACE}/bin/activate && pip install -r requirements.txt
+	source ${VIRTUALENV_NAMESPACE}/bin/activate && pip install --upgrade pip && pip install -r requirements.txt
 
 build_images:
 	make build_base

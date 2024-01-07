@@ -7,5 +7,6 @@
     },
     "label"   : "tb" ,
     "batch_size"  : 16,
-    "sample_size" : 3200
+    "sample_size" : 3200,
+    "epochs"      : 1000
 }

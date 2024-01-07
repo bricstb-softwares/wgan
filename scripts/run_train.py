@@ -4,10 +4,11 @@
 import tensorflow as tf 
 import pandas as pd
 import numpy as np
-import argparse, traceback, json, os, pickle
+import argparse, traceback, json, os, pickle, sys
 
 from wgan.models import *
-from wgan import wgangp_optimizer, prepare_real_data
+from wgan.core   import prepare_data
+from wgan import wgangp_optimizer, prepare_data, generate_samples
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from loguru import logger
 
@@ -16,7 +17,7 @@ from loguru import logger
 #
 # train 
 #
-def run_train():
+def run():
 
 
     #
@@ -46,7 +47,9 @@ def run_train():
         dest='wandb_taskname', required = False, default='task',
         help = "wandb task name")
 
-
+    parser.add_argument('--dry_run', action='store_true', 
+        dest='dry_run', required = False, 
+        help = "Dry run it!")
 
     if len(sys.argv)==1:
       parser.print_help()
@@ -61,7 +64,7 @@ def run_train():
     run_id       = os.environ.get('MLFLOW_RUN_ID'   ,'' )
     tracking_url = os.environ.get('MLFLOW_URL'      , '')
     dry_run      = os.environ.get('JOB_DRY_RUN'     ,'false') == 'true'
-
+    dry_run      = dry_run or args.dry_run
 
     if device>=0:
         logger.info(f"running in gpu device: {device}")
@@ -79,16 +82,17 @@ def run_train():
         sort         = job['sort']
         test         = job['test']
     
-        params       = json.load(open(args.card, ''))
+        params       = json.load(open(args.card, 'rb'))
         target       = params['label'] == "tb"
-        data_info    = params['data_info']
+        data_info    = params['dataset_info']
         sample_size  = params['sample_size']
         batch_size   = params['batch_size']
+        epochs       = params['epochs'] if not dry_run else 1
 
         #
         # Check if we need to recover something...
         #
-        if os.path.exists(args.volume+'/checkpoint.json'):
+        if os.path.exists(workarea+'/checkpoint.json'):
             logger.info('reading from last checkpoint...')
             checkpoint = json.load(open(workarea+'/checkpoint.json', 'r'))
             history = json.load(open(checkpoint['history'], 'r'))
@@ -110,7 +114,7 @@ def run_train():
    
 
         logger.info('prepare data...')
-        data            = prepare_real_data( data_info )
+        data            = prepare_data( data_info )
         training_data   = data.loc[(data.test==test)&(data.sort==sort)&(data.set=='train')]
         validation_data = data.loc[(data.test==test)&(data.sort==sort)&(data.set=='val')  ]
         training_data   = training_data.loc[training_data.target==target]
@@ -120,7 +124,7 @@ def run_train():
         logger.info(validation_data.shape)
 
 
-        extra_d = {'sort' : sort, 'test':test, 'target':target}
+        extra_d = {'sort' : sort, 'test':test, 'target':target, 'params' : params}
 
         logger.info('prepare dataset...')
         datagen = ImageDataGenerator( rescale=1./255 )
@@ -175,8 +179,7 @@ def run_train():
             wandb=None
 
 
-        if is_test:
-            sys.exit(0)
+       
 
         logger.info('fit...')
         # Run!
@@ -195,10 +198,11 @@ def run_train():
         # generate samples
         #
         if sample_size > 0:
-            logger.info('prepare sample generation...')
-            os.makedirs(workarea+'/samples', exist_ok=True)
-            nblocks = int(sample_size/batch_size)
-            generate_samples( generator ,workarea+'/samples', image_name, nblocks = nblocks , seed=seed)
+          logger.info('prepare sample generation...')
+          os.makedirs(workarea+'/samples', exist_ok=True)
+          nblocks = int(sample_size/batch_size) if not dry_run else 1
+          image_output = f'test_{test}.sort_{sort}'
+          generate_samples( generator ,workarea+'/samples', nblocks = nblocks )
 
 
         #

@@ -29,6 +29,3 @@ from . import models
 __all__.extend( models.__all__ )
 from .models import *
 
-from . import datasets
-__all__.extend( datasets.__all__ )
-from .datasets import *

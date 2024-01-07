@@ -13,11 +13,11 @@ import json
 import atlas_mpl_style as ampl
 ampl.use_atlas_style()
 
-from rxwgan.core import declare_property
-from rxwgan.core.stats import calculate_divergences, calculate_l1_and_l2_norm_errors, eps
+from wgan import declare_property
+from wgan.core.stats import calculate_divergences, calculate_l1_and_l2_norm_errors, eps
 
 from mlflow.tracking import MlflowClient
-
+from loguru import logger
 
 class wgangp_optimizer(object):
 
